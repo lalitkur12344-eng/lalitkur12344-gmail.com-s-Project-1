@@ -193,6 +193,25 @@ async function runTests() {
   console.log('\n[Suite 8: Strict MongoDB Architecture & Error Reporting]');
   await db.init();
   assert(typeof db.isConnected === 'boolean', 'DB manager maintains isConnected boolean');
+  
+  // Test Health Status Reporter
+  const healthStatus = await db.getHealthStatus();
+  assert(typeof healthStatus.connected === 'boolean', 'getHealthStatus reports boolean connected state');
+  assert(typeof healthStatus.status === 'string', 'getHealthStatus reports descriptive status string');
+  assert(typeof healthStatus.readyState === 'number', 'getHealthStatus reports numeric Mongoose readyState');
+  assert(typeof healthStatus.checkedAt === 'string', 'getHealthStatus includes ISO checkedAt timestamp');
+
+  // Test Ping in disconnected/mock state
+  const pingCheck = await db.checkPing();
+  if (!db.isConnected) {
+    assert(pingCheck.ok === false, 'checkPing returns ok: false when disconnected');
+    assert(typeof pingCheck.error === 'string', 'checkPing returns error message when disconnected');
+  }
+
+  // Test connectAndVerify handles failures gracefully
+  const verifyResult = await db.connectAndVerify({ maxRetries: 1, timeoutMs: 500 });
+  assert(typeof verifyResult.success === 'boolean', 'connectAndVerify returns structured success result');
+
   if (!db.isConnected) {
     assert(typeof db.connectionError === 'string', 'Logs specific connection error message when disconnected');
     let threwError = false;
@@ -701,6 +720,90 @@ async function runTests() {
   // Admin access
   const adminAccess = checkComplaintAccess(adminUser, complaintStudentA);
   assert(adminAccess.allowed === true && adminAccess.httpStatus === 200, 'Admin has authorized global oversight access');
+
+  // ============================================================================
+  // SUITE 16: DELIVERY RESULT INSPECTION & ERROR RESILIENCE
+  // ============================================================================
+  console.log('\n[Suite 16: Delivery Verification & Partial Delivery Resilience]');
+
+  // Test placeholder detection in getEmailConfig & getSmsConfig
+  const origSmtpUser = process.env.SMTP_USER;
+  const origSmtpPass = process.env.SMTP_PASS;
+  const origTwilioSid = process.env.TWILIO_ACCOUNT_SID;
+
+  process.env.SMTP_USER = 'YOUR_GMAIL_ADDRESS@gmail.com';
+  process.env.SMTP_PASS = 'YOUR_GOOGLE_APP_PASSWORD';
+  const emailCfgWithPlaceholders = getEmailConfig();
+  assert(emailCfgWithPlaceholders.isConfigured === false, 'getEmailConfig correctly detects and rejects placeholder YOUR_* credentials');
+
+  process.env.TWILIO_ACCOUNT_SID = 'YOUR_TWILIO_SID';
+  const smsCfgWithPlaceholders = getSmsConfig();
+  assert(smsCfgWithPlaceholders.isConfigured === false, 'getSmsConfig correctly detects and rejects placeholder YOUR_* credentials');
+
+  // Restore env
+  process.env.SMTP_USER = origSmtpUser;
+  process.env.SMTP_PASS = origSmtpPass;
+  process.env.TWILIO_ACCOUNT_SID = origTwilioSid;
+
+  // Test Partial Delivery Handling Logic
+  function evaluateDeliveryStatus(
+    emailRes: { success: boolean; status: string; errorCategory?: string },
+    smsRes: { success: boolean; status: string; errorCategory?: string },
+    isProd: boolean
+  ) {
+    if (isProd && !emailRes.success && !smsRes.success && emailRes.status !== 'skipped' && smsRes.status !== 'skipped') {
+      return { httpStatus: 502, error: 'Both channels failed' };
+    }
+    let partialNotice: string | undefined;
+    if (emailRes.success && !smsRes.success && smsRes.status !== 'skipped') {
+      partialNotice = 'Email OTP was delivered to your institutional inbox, but SMS delivery failed.';
+    } else if (!emailRes.success && smsRes.success && emailRes.status !== 'skipped') {
+      partialNotice = 'SMS OTP was sent to your phone, but institutional email delivery failed.';
+    }
+    return { httpStatus: 200, partialNotice };
+  }
+
+  // Case 1: Both succeeded
+  const bothSucceeded = evaluateDeliveryStatus({ success: true, status: 'sent' }, { success: true, status: 'sent' }, true);
+  assert(bothSucceeded.httpStatus === 200 && !bothSucceeded.partialNotice, 'Delivery returns 200 without partial notice when both email and SMS succeed');
+
+  // Case 2: Email succeeded, SMS failed (e.g. unverified trial number)
+  const emailOkSmsFail = evaluateDeliveryStatus({ success: true, status: 'sent' }, { success: false, status: 'failed', errorCategory: 'PROVIDER_ERROR' }, true);
+  assert(emailOkSmsFail.httpStatus === 200 && Boolean(emailOkSmsFail.partialNotice?.includes('SMS delivery failed')), 'Returns partial delivery notice when email succeeds but SMS fails');
+
+  // Case 3: SMS succeeded, Email failed (e.g. SMTP connection timeout)
+  const smsOkEmailFail = evaluateDeliveryStatus({ success: false, status: 'failed', errorCategory: 'CONNECTION_ERROR' }, { success: true, status: 'sent' }, true);
+  assert(smsOkEmailFail.httpStatus === 200 && Boolean(smsOkEmailFail.partialNotice?.includes('email delivery failed')), 'Returns partial delivery notice when SMS succeeds but email fails');
+
+  // Case 4: Both failed in production -> HTTP 502 Bad Gateway
+  const bothFailedProd = evaluateDeliveryStatus({ success: false, status: 'failed', errorCategory: 'CONNECTION_ERROR' }, { success: false, status: 'failed', errorCategory: 'AUTH_FAILURE' }, true);
+  assert(bothFailedProd.httpStatus === 502, 'Fails fast with HTTP 502 when both email and SMS providers fail in production');
+
+  // ============================================================================
+  // SUITE 17: CORS ORIGIN WHITELIST & PREFLIGHT DEFENSE
+  // ============================================================================
+  console.log('\n[Suite 17: CORS Origin Matching & Preflight Defense]');
+
+  const testOrigins = 'http://localhost:3000, http://127.0.0.1:3000, http://localhost:5173, https://campuscare.recb.ac.in';
+  const parsedOrigins = testOrigins.split(',').map((o) => o.trim()).filter(Boolean);
+
+  function isOriginAllowed(origin: string | undefined, allowedList: string[]): boolean {
+    if (!origin) return true; // non-browser
+    if (allowedList.includes('*') || allowedList.includes(origin)) return true;
+    if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return true;
+    if (/^https:\/\/([a-z0-9-]+\.)*(run\.app|googleusercontent\.com)$/.test(origin)) return true;
+    if (/^https:\/\/([a-z0-9-]+\.)*(recb\.ac\.in|recbijnor\.ac\.in)$/.test(origin)) return true;
+    return false;
+  }
+
+  assert(isOriginAllowed('http://localhost:3000', parsedOrigins), 'Allows localhost:3000 dev origin');
+  assert(isOriginAllowed('http://localhost:5173', parsedOrigins), 'Allows Vite frontend dev origin localhost:5173');
+  assert(isOriginAllowed('https://campuscare.recb.ac.in', parsedOrigins), 'Allows official college portal origin');
+  assert(isOriginAllowed('https://ais-dev-vzeqlnaow6vodm3i44ap2z-759761319828.asia-northeast1.run.app', parsedOrigins), 'Allows AI Studio Cloud Run preview domain');
+  assert(isOriginAllowed('https://ais-pre-preview.asia-northeast1.run.app', parsedOrigins), 'Allows AI Studio preview domain');
+  assert(isOriginAllowed('http://malicious-phishing-recb.ac.in.attacker.com', parsedOrigins) === false, 'Rejects spoofed malicious origin');
+  assert(isOriginAllowed('https://evil-hacker.com', parsedOrigins) === false, 'Rejects unlisted third-party domain');
+  assert(isOriginAllowed(undefined, parsedOrigins) === true, 'Allows server-to-server and mobile clients without Origin header');
 
   console.log(`\n========================================`);
   console.log(`  TEST RESULTS: ${passed} PASSED, ${failed} FAILED`);

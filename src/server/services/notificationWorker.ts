@@ -6,7 +6,7 @@ import { db } from '../db';
 export class NotificationDeliveryWorker {
   private isRunning: boolean = false;
   private intervalTimer: NodeJS.Timeout | null = null;
-  private concurrency: number = 5;
+  private concurrency: number = Number(process.env.NOTIFICATION_WORKER_CONCURRENCY) || 5;
 
   startWorker(pollIntervalMs: number = 30000): void {
     if (this.intervalTimer) return;

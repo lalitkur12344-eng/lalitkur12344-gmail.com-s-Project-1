@@ -13,9 +13,28 @@ import {
   PendingRegistrationModel,
 } from './models';
 
+export interface MongoHealthStatus {
+  connected: boolean;
+  status: 'connected' | 'connecting' | 'disconnected' | 'disconnecting' | 'unconfigured';
+  readyState: number;
+  uriConfigured: boolean;
+  pingLatencyMs: number | null;
+  host?: string;
+  databaseName?: string;
+  error: string | null;
+  checkedAt: string;
+}
+
+export interface ConnectionOptions {
+  maxRetries?: number;
+  retryDelayMs?: number;
+  timeoutMs?: number;
+}
+
 export interface DatabaseAdapter {
   isConnected: boolean;
   connectionError: string | null;
+  mongoUriConfigured: boolean;
   users: CollectionStore<any>;
   complaints: CollectionStore<any>;
   departments: CollectionStore<any>;
@@ -26,6 +45,10 @@ export interface DatabaseAdapter {
   emailVerifications: CollectionStore<any>;
   pendingRegistrations: CollectionStore<any>;
   init(): Promise<void>;
+  connectAndVerify(options?: ConnectionOptions): Promise<{ success: boolean; latencyMs?: number; error?: string }>;
+  checkPing(): Promise<{ ok: boolean; latencyMs: number | null; error: string | null }>;
+  getHealthStatus(): Promise<MongoHealthStatus>;
+  disconnect(): Promise<void>;
 }
 
 export interface CollectionStore<T> {
@@ -154,36 +177,162 @@ class DatabaseManager implements DatabaseAdapter {
     this.pendingRegistrations = new MongooseCollection<any>(PendingRegistrationModel, isConn, getErr);
   }
 
-  async init(): Promise<void> {
+  private isListenersRegistered: boolean = false;
+
+  private registerConnectionListeners(): void {
+    if (this.isListenersRegistered) return;
+    this.isListenersRegistered = true;
+
+    mongoose.connection.on('connected', () => {
+      this.isConnected = true;
+      this.connectionError = null;
+      console.log('[DB Lifecycle] Mongoose connected event fired.');
+    });
+
+    mongoose.connection.on('disconnected', () => {
+      this.isConnected = false;
+      this.connectionError = 'MongoDB connection lost (disconnected event).';
+      console.warn('[DB Lifecycle] Mongoose disconnected event fired.');
+    });
+
+    mongoose.connection.on('error', (err: any) => {
+      this.isConnected = false;
+      this.connectionError = err?.message || String(err);
+      console.error('[DB Lifecycle] Mongoose connection error event:', this.connectionError);
+    });
+
+    mongoose.connection.on('reconnected', () => {
+      this.isConnected = true;
+      this.connectionError = null;
+      console.log('[DB Lifecycle] Mongoose reconnected event fired.');
+    });
+  }
+
+  async checkPing(): Promise<{ ok: boolean; latencyMs: number | null; error: string | null }> {
+    if (mongoose.connection.readyState !== 1 || !mongoose.connection.db) {
+      return {
+        ok: false,
+        latencyMs: null,
+        error: this.connectionError || 'MongoDB is not in connected state (readyState !== 1).',
+      };
+    }
+
+    try {
+      const startTime = Date.now();
+      await mongoose.connection.db.admin().ping();
+      const latencyMs = Date.now() - startTime;
+      return { ok: true, latencyMs, error: null };
+    } catch (err: any) {
+      this.isConnected = false;
+      this.connectionError = `Database ping command failed: ${err.message || String(err)}`;
+      return { ok: false, latencyMs: null, error: this.connectionError };
+    }
+  }
+
+  async getHealthStatus(): Promise<MongoHealthStatus> {
+    const readyState = mongoose.connection.readyState;
+    const stateMap: Record<number, 'disconnected' | 'connected' | 'connecting' | 'disconnecting'> = {
+      0: 'disconnected',
+      1: 'connected',
+      2: 'connecting',
+      3: 'disconnecting',
+    };
+
+    const currentStatus = !this.mongoUriConfigured ? 'unconfigured' : stateMap[readyState] || 'disconnected';
+
+    let pingLatencyMs: number | null = null;
+    let pingError: string | null = null;
+
+    if (readyState === 1 && mongoose.connection.db) {
+      const pingRes = await this.checkPing();
+      pingLatencyMs = pingRes.latencyMs;
+      if (!pingRes.ok) {
+        pingError = pingRes.error;
+      }
+    }
+
+    const isFullyConnected = this.isConnected && readyState === 1 && pingError === null;
+
+    return {
+      connected: isFullyConnected,
+      status: currentStatus,
+      readyState,
+      uriConfigured: this.mongoUriConfigured,
+      pingLatencyMs,
+      host: mongoose.connection.host || undefined,
+      databaseName: mongoose.connection.name || undefined,
+      error: pingError || this.connectionError,
+      checkedAt: new Date().toISOString(),
+    };
+  }
+
+  async connectAndVerify(options?: ConnectionOptions): Promise<{ success: boolean; latencyMs?: number; error?: string }> {
+    this.registerConnectionListeners();
+
     const mongoUri = process.env.MONGODB_URI;
     this.mongoUriConfigured = Boolean(mongoUri);
 
     if (!mongoUri) {
       this.isConnected = false;
       this.connectionError = 'MONGODB_URI environment variable is not defined.';
-      console.warn('[DB] MONGODB_URI not configured. MongoDB persistence is unavailable until MONGODB_URI is provided.');
-      return;
+      return { success: false, error: this.connectionError };
     }
 
-    try {
-      console.log('[DB] Connecting to MongoDB via Mongoose...');
-      await mongoose.connect(mongoUri, {
-        serverSelectionTimeoutMS: 5000,
-        connectTimeoutMS: 5000,
-      });
+    const maxRetries = options?.maxRetries ?? 3;
+    const retryDelayMs = options?.retryDelayMs ?? 1500;
+    const timeoutMs = options?.timeoutMs ?? 5000;
 
-      this.isConnected = true;
-      this.connectionError = null;
-      console.log('[DB] Connected to MongoDB successfully. Mongoose models active.');
+    let lastError = 'Unknown connection failure';
 
-      // Safely preserve and migrate any records from existing json storage if MongoDB is empty
-      await this.migrateLegacyDataIfEmpty();
-    } catch (err: any) {
-      this.isConnected = false;
-      this.connectionError = err.message || String(err);
-      console.error(`[DB] MongoDB connection failure: ${this.connectionError}`);
-      console.error('[DB] Note: In accordance with system requirements, silent fallback to in-memory/file storage is disabled.');
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`[DB] Establishing robust connection check (attempt ${attempt}/${maxRetries})...`);
+
+        if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+          const pingResult = await this.checkPing();
+          if (pingResult.ok) {
+            this.isConnected = true;
+            this.connectionError = null;
+            await this.migrateLegacyDataIfEmpty();
+            return { success: true, latencyMs: pingResult.latencyMs ?? 0 };
+          }
+        }
+
+        if (mongoose.connection.readyState !== 1) {
+          await mongoose.connect(mongoUri, {
+            serverSelectionTimeoutMS: timeoutMs,
+            connectTimeoutMS: timeoutMs,
+          });
+        }
+
+        const ping = await this.checkPing();
+        if (ping.ok) {
+          this.isConnected = true;
+          this.connectionError = null;
+          console.log(`[DB] MongoDB connection check passed (ping: ${ping.latencyMs}ms). Host: ${mongoose.connection.host}, DB: ${mongoose.connection.name}`);
+          await this.migrateLegacyDataIfEmpty();
+          return { success: true, latencyMs: ping.latencyMs ?? 0 };
+        } else {
+          throw new Error(ping.error || 'Ping verification returned non-ok response.');
+        }
+      } catch (err: any) {
+        lastError = err?.message || String(err);
+        this.isConnected = false;
+        this.connectionError = lastError;
+        console.warn(`[DB] Connection check attempt ${attempt}/${maxRetries} failed: ${lastError}`);
+
+        if (attempt < maxRetries) {
+          console.log(`[DB] Waiting ${retryDelayMs}ms before retrying connection...`);
+          await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+        }
+      }
     }
+
+    return { success: false, error: lastError };
+  }
+
+  async init(): Promise<void> {
+    await this.connectAndVerify({ maxRetries: 1, timeoutMs: 5000 });
   }
 
   private async migrateLegacyDataIfEmpty(): Promise<void> {
@@ -225,6 +374,13 @@ class DatabaseManager implements DatabaseAdapter {
     } catch (migErr: any) {
       console.warn('[DB Migration] Notice during legacy record migration:', migErr.message);
     }
+  }
+
+  async disconnect(): Promise<void> {
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+    this.isConnected = false;
   }
 }
 

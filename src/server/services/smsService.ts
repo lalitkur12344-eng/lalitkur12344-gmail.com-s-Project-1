@@ -31,7 +31,20 @@ export function getSmsConfig() {
   const fromNumber = process.env.TWILIO_PHONE_NUMBER || '';
   const appBaseUrl = process.env.APP_BASE_URL || 'http://localhost:3000';
 
-  const isConfigured = Boolean(accountSid && authToken && fromNumber);
+  const isFromNumberValid = Boolean(
+    fromNumber &&
+    (fromNumber.startsWith('+') || /^\d{10,15}$/.test(fromNumber) || /^[a-zA-Z0-9]{3,11}$/.test(fromNumber))
+  );
+
+  const isConfigured = Boolean(
+    accountSid &&
+    authToken &&
+    fromNumber &&
+    isFromNumberValid &&
+    !accountSid.includes('YOUR_') &&
+    !authToken.includes('YOUR_') &&
+    !fromNumber.includes('YOUR_')
+  );
 
   return {
     provider,

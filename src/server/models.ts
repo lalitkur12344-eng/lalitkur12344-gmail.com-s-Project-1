@@ -31,13 +31,13 @@ export interface IUser extends Document {
 
 export const UserSchema = new Schema<IUser>(
   {
-    identifier: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
-    email: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
+    identifier: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     name: { type: String, required: true, trim: true },
     role: { type: String, required: true, enum: ['student', 'faculty', 'staff', 'admin'], default: 'student' },
     passwordHash: { type: String, required: true },
     department: { type: String, trim: true },
-    enrollmentNumber: { type: String, trim: true, sparse: true, index: true },
+    enrollmentNumber: { type: String, trim: true, sparse: true },
     mobileNumber: { type: String, trim: true },
     notificationPreferences: {
       email: { type: Boolean, default: true },
@@ -357,7 +357,7 @@ export interface ICollegeRoster extends Document {
 
 export const CollegeRosterSchema = new Schema<ICollegeRoster>(
   {
-    email: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     name: { type: String, required: true, trim: true },
     role: { type: String, required: true, enum: ['student', 'faculty', 'staff', 'admin'], default: 'student', index: true },
     enrollmentNumber: { type: String, uppercase: true, trim: true, sparse: true, index: true },
@@ -450,7 +450,7 @@ export interface IPendingRegistration extends Document {
 
 export const PendingRegistrationSchema = new Schema<IPendingRegistration>(
   {
-    email: { type: String, required: true, lowercase: true, trim: true, unique: true, index: true },
+    email: { type: String, required: true, lowercase: true, trim: true, unique: true },
     enrollmentNumber: { type: String, required: true, trim: true, uppercase: true, index: true },
     name: { type: String, required: true, trim: true },
     mobileNumber: { type: String, required: true, trim: true },

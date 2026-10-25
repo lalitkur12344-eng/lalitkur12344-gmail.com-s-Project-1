@@ -253,7 +253,7 @@ router.post('/register/initiate', async (req, res): Promise<void> => {
       expiresInMinutes: 10,
     });
 
-    await sendEmail({
+    const emailResult = await sendEmail({
       to: cleanEmail,
       subject: 'Your Email Verification Code - REC Bijnor Campus Care',
       html: emailTpl.html,
@@ -262,17 +262,47 @@ router.post('/register/initiate', async (req, res): Promise<void> => {
     });
 
     // Dispatch SMS OTP
-    await sendSms({
+    const smsResult = await sendSms({
       to: cleanMobile,
       body: `[REC Bijnor] Your mobile verification code is: ${smsOtp}. Valid for 10 minutes. Do not share this OTP.`,
       eventType: 'registration_sms_otp',
     });
+
+    // In production, fail fast if both communication channels failed and were not skipped/unconfigured
+    if (
+      process.env.NODE_ENV === 'production' &&
+      !emailResult.success &&
+      !smsResult.success &&
+      emailResult.status !== 'skipped' &&
+      smsResult.status !== 'skipped'
+    ) {
+      res.status(502).json({
+        error: 'Failed to deliver verification codes via institutional email and SMS. Please try again or contact portal support.',
+        delivery: {
+          email: { status: emailResult.status, errorCategory: emailResult.errorCategory },
+          sms: { status: smsResult.status, errorCategory: smsResult.errorCategory },
+        },
+      });
+      return;
+    }
+
+    let partialNotice: string | undefined;
+    if (emailResult.success && !smsResult.success && smsResult.status !== 'skipped') {
+      partialNotice = 'Email OTP was delivered to your institutional inbox, but SMS delivery failed. You may verify with email or retry SMS.';
+    } else if (!emailResult.success && smsResult.success && emailResult.status !== 'skipped') {
+      partialNotice = 'SMS OTP was sent to your phone, but institutional email delivery failed. You may verify with SMS or retry email.';
+    }
 
     res.json({
       message: genericSuccessMessage,
       emailMasked: maskEmail(cleanEmail),
       mobileMasked: maskPhone(cleanMobile),
       resendAvailableInSeconds: 60,
+      partialNotice,
+      delivery: {
+        email: emailResult.status,
+        sms: smsResult.status,
+      },
       devEmailOtp: process.env.NODE_ENV !== 'production' ? emailOtp : undefined,
       devSmsOtp: process.env.NODE_ENV !== 'production' ? smsOtp : undefined,
     });
@@ -485,13 +515,22 @@ router.post('/register/resend-dual-otp', async (req, res): Promise<void> => {
         expiresInMinutes: 10,
       });
 
-      await sendEmail({
+      const emailResult = await sendEmail({
         to: pending.email,
         subject: 'New Email Verification Code - REC Bijnor Campus Care',
         html: emailTpl.html,
         text: emailTpl.text,
         eventType: 'registration_email_otp_resend',
       });
+
+      if (process.env.NODE_ENV === 'production' && !emailResult.success && emailResult.status !== 'skipped') {
+        res.status(502).json({
+          error: 'Failed to deliver email verification code. Please check your institutional email address or try again.',
+          deliveryStatus: emailResult.status,
+          errorCategory: emailResult.errorCategory,
+        });
+        return;
+      }
     } else {
       pending.smsOtpHashed = newOtpHashed;
       pending.smsAttemptsRemaining = 5;
@@ -500,11 +539,20 @@ router.post('/register/resend-dual-otp', async (req, res): Promise<void> => {
       pending.smsResendCount += 1;
       await pending.save();
 
-      await sendSms({
+      const smsResult = await sendSms({
         to: pending.mobileNumber,
         body: `[REC Bijnor] Your new mobile verification code is: ${newOtp}. Valid for 10 minutes.`,
         eventType: 'registration_sms_otp_resend',
       });
+
+      if (process.env.NODE_ENV === 'production' && !smsResult.success && smsResult.status !== 'skipped') {
+        res.status(502).json({
+          error: 'Failed to deliver SMS verification code. Please check your mobile number or try again.',
+          deliveryStatus: smsResult.status,
+          errorCategory: smsResult.errorCategory,
+        });
+        return;
+      }
     }
 
     res.json({
@@ -641,13 +689,22 @@ router.post('/register/request-otp', async (req, res): Promise<void> => {
       expiresInMinutes: 10,
     });
 
-    await sendEmail({
+    const emailResult = await sendEmail({
       to: cleanEmail,
       subject: 'Your Verification Code - REC Bijnor Campus Care',
       html: emailTemplate.html,
       text: emailTemplate.text,
       eventType: 'registration_otp',
     });
+
+    if (process.env.NODE_ENV === 'production' && !emailResult.success && emailResult.status !== 'skipped') {
+      res.status(502).json({
+        error: 'Failed to deliver email verification code. Please check your official email or try again later.',
+        deliveryStatus: emailResult.status,
+        errorCategory: emailResult.errorCategory,
+      });
+      return;
+    }
 
     res.json({
       message: genericSuccessMessage,
@@ -903,13 +960,22 @@ router.post('/register/resend-otp', async (req, res): Promise<void> => {
       expiresInMinutes: 10,
     });
 
-    await sendEmail({
+    const emailResult = await sendEmail({
       to: cleanEmail,
       subject: 'New Verification Code - REC Bijnor Campus Care',
       html: emailTemplate.html,
       text: emailTemplate.text,
       eventType: 'registration_otp_resend',
     });
+
+    if (process.env.NODE_ENV === 'production' && !emailResult.success && emailResult.status !== 'skipped') {
+      res.status(502).json({
+        error: 'Failed to resend verification code. Please check your official email or try again later.',
+        deliveryStatus: emailResult.status,
+        errorCategory: emailResult.errorCategory,
+      });
+      return;
+    }
 
     res.json({
       message: 'A fresh 6-digit verification code has been dispatched to your official email.',

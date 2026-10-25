@@ -28,7 +28,14 @@ export function getEmailConfig() {
   const from = process.env.EMAIL_FROM || 'REC Bijnor Campus Care <campuscare@recb.ac.in>';
   const appBaseUrl = process.env.APP_BASE_URL || 'http://localhost:3000';
 
-  const isConfigured = Boolean(host && user && pass);
+  const isConfigured = Boolean(
+    host &&
+    user &&
+    pass &&
+    !user.includes('YOUR_') &&
+    !pass.includes('YOUR_') &&
+    !host.includes('YOUR_')
+  );
 
   return {
     host,

@@ -1,8 +1,8 @@
+import 'dotenv/config';
 import http from 'http';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
-import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
 
 import { db } from './src/server/db';
@@ -21,44 +21,97 @@ import announcementRoutes from './src/server/routes/announcementRoutes';
 import analyticsRoutes from './src/server/routes/analyticsRoutes';
 import adminRoutes from './src/server/routes/adminRoutes';
 
-dotenv.config();
-
 const app = express();
 const httpServer = http.createServer(app);
 const PORT = Number(process.env.PORT) || 3000;
 
-// Security & Parsing Middleware
-app.use(
-  cors({
-    origin: '*',
-    credentials: true,
-  })
-);
+// Dynamic CORS Origin Whitelist Parsing
+const defaultOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'http://localhost:5174',
+];
+const envCors = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean)
+  : defaultOrigins;
+
+export function isAllowedCorsOrigin(origin: string | undefined): boolean {
+  // Allow non-browser requests (mobile apps, curl, server-to-server)
+  if (!origin) return true;
+
+  // Wildcard or explicit whitelist match
+  if (envCors.includes('*') || envCors.includes(origin)) {
+    return true;
+  }
+
+  // Local development hostnames
+  if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    return true;
+  }
+
+  // AI Studio / Cloud Run dev & preview environments (*.run.app, *.googleusercontent.com)
+  if (/^https:\/\/([a-z0-9-]+\.)*(run\.app|googleusercontent\.com)$/.test(origin)) {
+    return true;
+  }
+
+  // Official REC Bijnor domains (*.recb.ac.in, *.recbijnor.ac.in)
+  if (/^https:\/\/([a-z0-9-]+\.)*(recb\.ac\.in|recbijnor\.ac\.in)$/.test(origin)) {
+    return true;
+  }
+
+  return false;
+}
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (isAllowedCorsOrigin(origin)) {
+      return callback(null, true);
+    }
+    // Return null, false to safely deny CORS headers without throwing an unhandled 500 error in Express
+    return callback(null, false);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
 // Health & Diagnostic Check Endpoint
-app.get('/api/health', (req: Request, res: Response) => {
+app.get('/api/health', async (req: Request, res: Response) => {
+  const dbHealth = await db.getHealthStatus();
   const quota = getQuotaStatus();
   const emailCfg = getEmailConfig();
   const smsCfg = getSmsConfig();
 
-  res.json({
-    status: db.isConnected ? 'healthy' : 'degraded',
+  const isHealthy = dbHealth.connected;
+  const httpStatus = isHealthy ? 200 : 503;
+
+  res.status(httpStatus).json({
+    status: isHealthy ? 'healthy' : 'degraded',
     system: 'REC Bijnor Campus Care Management Engine',
     uptimeSeconds: Math.round(process.uptime()),
     database: {
       type: 'MongoDB (Mongoose)',
-      connected: db.isConnected,
-      configured: db.mongoUriConfigured,
-      error: db.connectionError,
+      connected: dbHealth.connected,
+      status: dbHealth.status,
+      readyState: dbHealth.readyState,
+      configured: dbHealth.uriConfigured,
+      pingLatencyMs: dbHealth.pingLatencyMs,
+      host: dbHealth.host,
+      databaseName: dbHealth.databaseName,
+      error: dbHealth.error,
     },
     notifications: {
       emailConfigured: emailCfg.isConfigured,
       smsConfigured: smsCfg.isConfigured,
       smsProvider: smsCfg.provider,
-      workerActive: true,
+      workerActive: isHealthy && process.env.NOTIFICATION_QUEUE_ENABLED !== 'false',
       queueType: 'MongoDB Durable Event Queue',
     },
     aiEngine: {
@@ -69,6 +122,12 @@ app.get('/api/health', (req: Request, res: Response) => {
     },
     timestamp: new Date().toISOString(),
   });
+});
+
+// Dedicated DB Health Endpoint
+app.get('/api/health/db', async (req: Request, res: Response) => {
+  const dbHealth = await db.getHealthStatus();
+  res.status(dbHealth.connected ? 200 : 503).json(dbHealth);
 });
 
 // Database guard middleware for endpoints requiring persistence
@@ -109,29 +168,70 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 });
 
 async function startServer() {
-  // 1. Initialize MongoDB connection
-  await db.init();
+  console.log('[Server Startup] Initiating robust MongoDB connection check...');
 
-  // 2. Seed Baseline Data if connected
-  if (db.isConnected) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const strictStartup = process.env.STRICT_DB_STARTUP === 'true';
+
+  // 1. Perform robust connection check with retries and ping verification
+  const connResult = await db.connectAndVerify({
+    maxRetries: isProduction ? 5 : 2,
+    retryDelayMs: 2000,
+    timeoutMs: 5000,
+  });
+
+  if (!connResult.success) {
+    console.error(`[Server Startup] MongoDB connection check failed: ${connResult.error}`);
+
+    if (strictStartup) {
+      console.error('[Server Startup] STRICT_DB_STARTUP is enabled. Halting Express application startup.');
+      process.exit(1);
+    }
+
+    console.warn('[Server Startup] Application entering Diagnostic / Degraded Mode.');
+    console.warn('[Server Startup] Persistent business routes locked with 503 until MongoDB is available.');
+  } else {
+    console.log(`[Server Startup] MongoDB connection verified (${connResult.latencyMs}ms). Initializing services...`);
+
+    // 2. Seed Baseline Data if connected
     try {
       await seedInitialDataIfEmpty();
     } catch (seedErr: any) {
       console.warn('[Seed Service] Seed warning:', seedErr.message);
     }
-  } else {
-    console.warn('[Seed Service] Skipping database seeding because MongoDB is not connected.');
+
+    // 3. Start Background SLA Escalation Monitor
+    slaService.startWorker(60000);
+
+    // 4. Start Background Notification Delivery Queue Worker (Durable MongoDB Queue)
+    const queueEnabled = process.env.NOTIFICATION_QUEUE_ENABLED !== 'false';
+    if (queueEnabled) {
+      notificationWorker.startWorker(30000);
+    }
   }
 
-  // 3. Start Background SLA Escalation Monitor
-  slaService.startWorker(60000);
-
-  // 4. Start Background Notification Delivery Queue Worker (Durable MongoDB Queue)
-  notificationWorker.startWorker(30000);
+  // Background reconnect poll if URI was configured but initial connect failed
+  if (!db.isConnected && process.env.MONGODB_URI) {
+    const reconnectTimer = setInterval(async () => {
+      console.log('[DB Reconnect] Checking MongoDB availability...');
+      const retry = await db.connectAndVerify({ maxRetries: 1, timeoutMs: 3000 });
+      if (retry.success) {
+        clearInterval(reconnectTimer);
+        console.log('[DB Reconnect] Reconnected to MongoDB! Activating application services...');
+        try {
+          await seedInitialDataIfEmpty();
+        } catch (e: any) {
+          console.warn('[Seed Service] Seed warning:', e.message);
+        }
+        slaService.startWorker(60000);
+        if (process.env.NOTIFICATION_QUEUE_ENABLED !== 'false') {
+          notificationWorker.startWorker(30000);
+        }
+      }
+    }, 15000);
+  }
 
   // 5. Vite Frontend Integration with WebSocket server attached to httpServer
-  const isProduction = process.env.NODE_ENV === 'production';
-
   if (!isProduction) {
     const vite = await createViteServer({
       server: {
@@ -154,7 +254,7 @@ async function startServer() {
   const emailCfg = getEmailConfig();
   const smsCfg = getSmsConfig();
 
-  httpServer.listen(PORT, '0.0.0.0', () => {
+  const server = httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`====================================================`);
     console.log(`  REC Bijnor Campus Care Portal active on :${PORT}`);
     console.log(`  Environment: ${process.env.NODE_ENV || 'development'}`);
@@ -164,6 +264,27 @@ async function startServer() {
     console.log(`  Vite HMR: Attached to HTTP server on port ${PORT}`);
     console.log(`====================================================`);
   });
+
+  // Graceful shutdown handling
+  const shutdown = async (signal: string) => {
+    console.log(`\n[Process] Received ${signal}. Initiating graceful shutdown...`);
+    try {
+      slaService.stopWorker();
+      notificationWorker.stopWorker();
+      server.close(async () => {
+        console.log('[Process] HTTP server closed.');
+        await db.disconnect();
+        console.log('[Process] MongoDB connection closed.');
+        process.exit(0);
+      });
+    } catch (shutdownErr: any) {
+      console.error('[Process] Error during shutdown:', shutdownErr.message);
+      process.exit(1);
+    }
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 startServer().catch((err) => {

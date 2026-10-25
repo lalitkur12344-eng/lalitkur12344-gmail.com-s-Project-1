@@ -1,6 +1,7 @@
 import { Complaint, User, Department, NotificationItem, Announcement, AnalyticsData } from '../types';
 
-const API_BASE = '/api';
+const rawApiUrl = (import.meta as any).env?.VITE_API_URL || '';
+const API_BASE = rawApiUrl ? `${String(rawApiUrl).replace(/\/$/, '')}/api` : '/api';
 
 function getAuthHeader(): Record<string, string> {
   const token = localStorage.getItem('recb_campus_token');
