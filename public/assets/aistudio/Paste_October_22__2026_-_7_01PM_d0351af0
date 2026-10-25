@@ -1,0 +1,757 @@
+# COMPLETE PROJECT PROMPT — CAMPUS CARE
+## AI-Powered Campus Complaint and Service Management System
+
+Act as a senior full-stack developer, software architect, AI engineer, UI/UX designer, security engineer, and QA tester.
+
+Your task is to inspect, improve, debug, and complete my existing **Campus Care Management System** for Rajkiya Engineering College, Bijnor (REC Bijnor).
+
+The final application must be fast, reliable, secure, responsive, accessible, easy to maintain, and ready for real-world testing and deployment.
+
+**Most important instruction:** Do not rebuild the application from scratch. First inspect the complete existing codebase, understand its structure, identify existing features and problems, and improve the current implementation. Preserve working functionality and reuse existing components, APIs, models, and services wherever possible.
+
+Do not merely create a visual prototype or mock dashboard. All important actions must work with the real backend and MongoDB database.
+
+---
+
+# 1. PROJECT TECHNOLOGY
+
+Use the existing technology stack:
+
+### Frontend
+- React.js with JSX
+- Vite 8
+- JavaScript
+- Tailwind CSS v4
+- React Hooks
+- Lucide React icons
+- Fetch API or the project's existing API utility
+
+### Backend
+- Node.js
+- Express.js
+- REST APIs
+- MongoDB Atlas
+- Mongoose
+- JWT authentication
+- bcrypt/bcryptjs password hashing
+- Input validation and centralized error handling
+
+### AI integration
+- An existing supported LLM API, such as Gemini, if configured
+- Rule-based fallback for essential complaint classification and prioritization
+- Optional embeddings and semantic similarity for duplicate detection
+
+### Project conventions
+- Use the existing `@/` alias for imports from `src/`.
+- Preserve Vite 8's `resolve.tsconfigPaths: true` configuration.
+- Keep Tailwind CSS v4 configured through `@tailwindcss/vite` and `@import 'tailwindcss'` in `src/index.css`.
+- Define theme variables using CSS `@theme` where appropriate.
+- Do not add a `tailwind.config.js`, PostCSS config, or duplicate path-alias plugin.
+- Do not install unnecessary UI, icon, or styling libraries.
+- Use `lucide-react` for icons.
+
+Do not migrate the project to Supabase, Firebase, or another database. MongoDB Atlas must remain the primary persistent database.
+
+---
+
+# 2. FIRST: AUDIT THE EXISTING PROJECT
+
+Before editing code:
+
+1. Inspect the root `package.json`, Vite configuration, Tailwind CSS setup, environment variables, frontend source, backend source, routes, controllers, models, middleware, scripts, and dependencies.
+2. Identify which features already work, which are incomplete, and which are broken.
+3. Check for duplicate components, duplicate API calls, redundant database indexes, inconsistent field names, dead code, unused dependencies, and conflicting business logic.
+4. Check whether the frontend API paths match the backend routes and whether request/response formats are consistent.
+5. Check authentication, role-based authorization, database queries, notifications, AI services, and complaint status transitions.
+6. Check browser console errors, failed requests, CORS configuration, missing modules, loading states, and production build errors.
+7. Create a prioritized list of problems and fixes.
+
+Then implement the improvements in the existing codebase.
+
+Do not stop after the audit or provide only recommendations. Complete the actual code changes, test them, and summarize the results.
+
+Do not overwrite working features simply to introduce a new architecture.
+
+---
+
+# 3. USER ROLES AND PERMISSIONS
+
+Implement or repair four roles:
+
+- Student
+- Faculty
+- Staff
+- Admin
+
+Enforce permissions on the backend, not just by hiding frontend buttons.
+
+### Student
+- Log in using an official identifier and password.
+- View and update permitted profile fields.
+- Submit complaints.
+- Attach evidence if supported.
+- Track personal complaints and their history.
+- Receive notifications.
+- Reopen eligible resolved complaints according to policy.
+- Submit feedback after resolution.
+
+### Faculty
+- Access faculty-authorized complaint and service functions.
+- Submit and track complaints.
+- Receive notifications.
+- View and manage only permitted information.
+
+### Staff
+- View complaints assigned to them or their department.
+- Update permitted complaint statuses.
+- Add progress notes and resolution evidence.
+- View their assigned workload.
+- Receive notifications about assignments and escalations.
+
+### Admin
+- Access the administration dashboard.
+- Create, edit, activate, deactivate, and remove users safely.
+- Create and manage staff accounts and department assignments.
+- Issue temporary passwords or password-reset links.
+- Manage departments, categories, priority policies, and SLA rules.
+- View and manage campus complaints.
+- Monitor AI suggestions and override them when necessary.
+- Reassign complaints and manage escalations.
+- Publish announcements.
+- View analytics, audit logs, and department performance.
+- Manage system settings.
+
+A user must never gain administrator or staff privileges by modifying frontend state or sending a modified API request.
+
+Use a safe deactivation or archival strategy when deleting users who are associated with historical complaints.
+
+---
+
+# 4. SINGLE LOGIN PAGE — NO PUBLIC REGISTRATION
+
+Create one common login page for students, faculty, staff, and admins.
+
+Login fields:
+- Official college email address OR enrollment number OR authorized username, depending on the existing account policy.
+- Password.
+- Show/hide password.
+- Forgot password.
+- Login button.
+- Clear validation and error messages.
+- Loading state during authentication.
+
+Use a single identifier field rather than separate login pages for different roles.
+
+Do not allow public registration.
+
+Only an authorized administrator can create or provision accounts.
+
+For students, enforce the college's approved identity-verification policy. Require the official college email, enrollment number, and mobile number during account provisioning if these are mandatory institutional requirements. Verify ownership through an appropriate OTP, invitation, or administrator-approved process before activating an account.
+
+The backend must normalize identifiers and prevent unauthorized account creation.
+
+Support secure password reset with expiring, single-use tokens or OTPs, rate limiting, and generic responses that do not reveal whether an account exists.
+
+Do not hardcode admin credentials in application code or expose passwords in API responses.
+
+Preserve the existing default-admin seed workflow if present, but make it safe and idempotent. Require environment-based credentials, and require a password change when appropriate.
+
+---
+
+# 5. STUDENT, FACULTY, AND STAFF PROFILE
+
+Create a useful My Profile page.
+
+Display permitted fields:
+- Full name
+- Role
+- Official email
+- Enrollment number or college ID
+- Mobile number
+- Department or branch
+- Academic year, where applicable
+- Hostel, where applicable
+- Account status
+
+Allow editing only of permitted fields.
+
+Protect verified identity fields such as enrollment number and official email from unauthorized changes. If a verified field must change, require a controlled verification process.
+
+Store all profile information in MongoDB.
+
+Provide proper loading, validation, success, and failure states.
+
+---
+
+# 6. COMPLAINT MANAGEMENT
+
+Build a complete complaint lifecycle.
+
+### Complaint form
+
+Include:
+- Complaint title
+- Detailed description
+- Category
+- Location
+- Hostel, block, room, or campus area where relevant
+- Priority or urgency information
+- Optional image evidence
+- Submission confirmation
+
+Categories should be configurable and may include:
+- Water
+- Electricity
+- Hostel
+- Mess and food
+- Cleanliness
+- Maintenance
+- Library
+- Internet and network
+- Sanitation
+- Other campus services
+
+Validate all fields on both frontend and backend.
+
+Limit input lengths, validate uploaded file types and sizes, and safely handle missing or invalid data.
+
+Generate a unique complaint ID on the server. Do not rely on client-generated IDs.
+
+Save the complaint to MongoDB before reporting successful submission.
+
+After submission, display the complaint ID and the next steps.
+
+Prevent accidental double submissions using frontend submission locking and an idempotency strategy where appropriate.
+
+---
+
+# 7. AI-POWERED COMPLAINT PROCESSING
+
+Extend existing AI functionality instead of duplicating it.
+
+### AI capabilities
+
+1. Classify complaint descriptions into supported categories.
+2. Suggest the relevant department.
+3. Identify possible urgency and severity.
+4. Detect potentially similar or duplicate complaints.
+5. Suggest an initial response or resolution checklist.
+6. Summarize long complaint descriptions for administrators.
+7. Identify repeated problems and recurring campus issues.
+
+### Important rules
+
+- AI must produce validated structured output, not arbitrary instructions.
+- Validate all AI output against an application-defined schema and allowed categories.
+- Never trust an AI-generated department, user ID, role, status, or database query without backend validation.
+- AI suggestions must not override authorization or safety policies.
+- A simple deterministic fallback must work when the AI API is unavailable.
+- Do not call the AI provider repeatedly for the same unchanged complaint without a reason.
+- Add sensible timeouts, limited retries, rate limiting, and error handling.
+- Keep API keys exclusively on the server.
+- Never send passwords, JWT secrets, or unnecessary personal information to an AI provider.
+- Treat complaint descriptions and uploaded documents as untrusted user content.
+- Clearly distinguish an AI suggestion from an approved administrative decision.
+
+### Duplicate detection
+
+Use multiple signals:
+- Text similarity
+- Category
+- Location
+- Time window
+- Related open complaints
+
+A duplicate candidate must not automatically cause a complaint to be discarded.
+
+Show possible matches to the user or administrator and allow a legitimate new complaint to proceed.
+
+Where appropriate, link related complaints or group them under a common incident.
+
+Measure duplicate-detection quality with test examples rather than claiming a fixed accuracy without evidence.
+
+---
+
+# 8. AUTOMATIC STAFF AND DEPARTMENT ASSIGNMENT
+
+Automatically recommend or assign a complaint to an eligible department and staff member using:
+
+- Complaint category
+- Campus location
+- Staff skills or responsibility
+- Staff availability and active status
+- Current assigned workload
+- Configured department rules
+
+Use deterministic assignment rules as the baseline. AI can assist with classification and recommendations, but must not be the sole source of authorization or assignment logic.
+
+If no suitable staff member is available:
+- Keep the complaint in an unassigned queue.
+- Notify the appropriate administrator.
+- Make the assignment status visible.
+- Do not silently mark the complaint as assigned.
+
+Allow administrators to override assignments and record the reason.
+
+Record assignment and reassignment events in the complaint history.
+
+---
+
+# 9. STATUS, SLA, AND ESCALATION
+
+Define allowed complaint statuses and enforce valid transitions on the backend.
+
+Recommended lifecycle:
+- Pending
+- Assigned
+- In Progress
+- Resolved
+- Closed
+- Reopened, where permitted
+
+Maintain a separate escalation flag or escalation level rather than mixing unrelated states into the status field.
+
+Every complaint should record:
+- Created timestamp
+- Current status
+- Assigned department and staff
+- Status-change history
+- Relevant timestamps
+- Resolution details
+- Feedback, if provided
+
+### SLA system
+
+- Configure deadlines by category and priority.
+- Use consistent server-side timestamps.
+- Identify overdue complaints.
+- Escalate overdue cases to the appropriate authority.
+- Prevent duplicate escalation events.
+- Record escalation reason and time.
+- Provide an admin view of pending and overdue cases.
+
+Do not hardcode an arbitrary SLA and present it as official college policy. Use configurable defaults until the institution approves its rules.
+
+Implement a reliable background scheduling mechanism for overdue complaints. Do not rely on a browser tab being open.
+
+---
+
+# 10. NOTIFICATION SYSTEM
+
+Use MongoDB to persist in-app notifications.
+
+Supported events should include:
+- Complaint submitted
+- Complaint categorized
+- Complaint assigned or reassigned
+- Complaint status changed
+- Complaint escalated
+- Complaint resolved or reopened
+- Feedback requested
+- Important campus announcements
+
+Each notification should include:
+- Recipient
+- Event type
+- Title and message
+- Related complaint ID, where applicable
+- Created timestamp
+- Read/unread state
+- Relevant navigation target
+
+### Notification reliability
+
+- Create notifications through shared backend services.
+- Use event identifiers or idempotency keys to prevent duplicates.
+- Ensure that notifications are created only for authorized recipients.
+- Use indexes for recipient and unread queries.
+- Support pagination and mark-as-read actions.
+- Make notification actions open the relevant complaint.
+- Avoid blocking complaint submission when a non-critical email service is unavailable.
+
+### Email and SMS
+
+Email notifications should be supported through server-side configuration.
+
+SMS can be optional and enabled only when configured.
+
+If a notification provider fails:
+- Record the failure safely.
+- Retry transient failures with bounded backoff.
+- Avoid duplicate messages.
+- Provide an administrative view of delivery failures where appropriate.
+
+Do not falsely report that an email or SMS was sent when the system only logged a dry-run message.
+
+---
+
+# 11. ADMIN DASHBOARD AND ANALYTICS
+
+Build a useful dashboard with live data from the backend.
+
+Include:
+- Total complaints
+- Pending complaints
+- Assigned complaints
+- In-progress complaints
+- Resolved and closed complaints
+- Overdue complaints
+- High-priority and emergency complaints
+- Complaints by category
+- Complaints by department
+- Average resolution time
+- SLA compliance
+- Feedback and satisfaction ratings
+- Staff workload and resolution performance
+
+Include filters for:
+- Date range
+- Category
+- Status
+- Priority
+- Department
+- Assigned staff
+
+Use server-side filtering and aggregation for large datasets.
+
+Do not calculate misleading analytics from only the currently displayed page.
+
+Show empty states when no data exists and distinguish unavailable data from zero results.
+
+Do not invent sample analytics in production mode.
+
+---
+
+# 12. FRONTEND UI/UX DESIGN
+
+Create a polished, professional, campus-focused design that feels intentionally designed rather than generated from a generic dashboard template.
+
+### Visual direction
+- Clean layouts with a restrained color palette.
+- Strong typography and clear hierarchy.
+- Consistent spacing and component sizes.
+- Thoughtful use of white space.
+- Subtle shadows and borders.
+- Lucide React icons.
+- Clear primary and secondary actions.
+- Accessible contrast and visible keyboard focus.
+- Responsive design for desktop, tablet, and mobile.
+
+### Required screens
+- Common login page
+- Forgot/reset password
+- Student/faculty/staff dashboard
+- Service category pages
+- Submit complaint
+- My complaints
+- Complaint details and timeline
+- Notifications
+- My Profile
+- Staff dashboard
+- Admin dashboard
+- User and staff management
+- Complaint management
+- Department and SLA settings
+- Announcements
+- Analytics
+- Access-denied and not-found pages
+
+### Usability requirements
+- Provide skeletons or loading indicators.
+- Provide helpful empty states.
+- Show clear validation and API error messages.
+- Disable submit buttons while requests are in progress.
+- Prevent accidental repeated submissions.
+- Add confirmation dialogs for destructive actions.
+- Preserve form data when a recoverable request fails.
+- Use accessible labels and keyboard navigation.
+- Avoid unnecessary animations and expensive visual effects.
+- Do not show fake success notifications.
+- Do not leave buttons that appear functional but do nothing.
+
+Keep existing project conventions and reusable components where they are sound.
+
+---
+
+# 13. SPEED AND PERFORMANCE
+
+Treat performance as a core requirement.
+
+### Frontend performance
+- Use route-level code splitting where useful.
+- Avoid loading all dashboard data on initial page load.
+- Fetch only the information required by the current screen.
+- Debounce search input.
+- Cancel stale requests where appropriate.
+- Prevent unnecessary React re-renders.
+- Use pagination or infinite loading for large lists.
+- Avoid duplicate API calls and duplicate effects.
+- Lazy-load non-critical components and images.
+- Optimize image sizes and avoid loading huge images unnecessarily.
+- Avoid adding dependencies without measurable value.
+
+### Backend performance
+- Add appropriate MongoDB indexes for actual query patterns.
+- Avoid duplicate indexes.
+- Use `.lean()` for read-only Mongoose queries where appropriate.
+- Select only required fields.
+- Use pagination and bounded query limits.
+- Avoid unbounded history and notification queries.
+- Use aggregation pipelines for suitable analytics.
+- Avoid N+1 query patterns.
+- Set sensible request and provider timeouts.
+- Avoid unnecessary sequential database queries.
+- Reuse database connections.
+- Configure connection pooling appropriately.
+- Add health and readiness endpoints.
+- Handle database outages without crashing unpredictably.
+
+Do not add caching indiscriminately. Cache only appropriate data with a clear invalidation strategy.
+
+Never sacrifice authorization, data correctness, or notification integrity for speed.
+
+---
+
+# 14. SECURITY AND DATA PRIVACY
+
+Implement production-minded security measures.
+
+- Hash passwords using bcrypt/bcryptjs with an appropriate work factor.
+- Keep JWT secrets, AI API keys, SMTP credentials, and database credentials in environment variables.
+- Never commit `.env` files or secrets to Git.
+- Validate and sanitize incoming data.
+- Use authentication and role-based authorization middleware.
+- Protect all admin endpoints.
+- Prevent insecure direct object reference vulnerabilities.
+- Check complaint ownership or assigned permissions on every relevant request.
+- Rate-limit login, password reset, and sensitive endpoints.
+- Use secure CORS allowlists for approved frontend origins.
+- Configure appropriate security headers.
+- Apply request size limits.
+- Validate file uploads, file types, file sizes, and storage permissions.
+- Do not expose stack traces or sensitive database details to users.
+- Avoid logging passwords, access tokens, reset tokens, or secret values.
+- Use secure token storage and expiration policies appropriate to the existing architecture.
+- Use HTTPS in production.
+- Restrict database access through MongoDB Atlas network access rules and database permissions.
+- Keep audit logs for important administrative and security actions.
+
+Use a secure file-storage solution for production evidence uploads. Do not assume that a local upload folder is durable in serverless or ephemeral hosting environments.
+
+Never expose sensitive environment values through frontend `VITE_` variables.
+
+---
+
+# 15. DATABASE DESIGN AND DATA INTEGRITY
+
+Inspect existing Mongoose models before changing the schema.
+
+Keep data models consistent and avoid creating duplicate collections or redundant fields.
+
+Expected entities may include:
+- User
+- Complaint
+- Department
+- Staff assignment, if needed
+- Complaint history
+- Notification
+- Announcement
+- Feedback
+- Audit log
+
+Use appropriate references, validation, indexes, timestamps, and unique constraints.
+
+Important rules:
+- Normalize emails and identifiers consistently.
+- Ensure complaint IDs are unique.
+- Store timestamps consistently in UTC.
+- Use server-side timestamps for authoritative events.
+- Enforce status transitions and role permissions.
+- Handle duplicate-key and validation errors cleanly.
+- Keep historical complaint records when users are deactivated.
+- Use transactions only where required and supported by the MongoDB deployment.
+- Ensure retries do not create duplicate complaints or notifications.
+
+Provide a safe migration strategy for schema changes. Do not delete production data or reset the database during ordinary development.
+
+---
+
+# 16. API DESIGN AND ERROR HANDLING
+
+Use consistent REST API conventions.
+
+Organize routes, controllers, services, models, and middleware clearly.
+
+Implement:
+- Consistent JSON responses
+- Appropriate HTTP status codes
+- Centralized error middleware
+- Request validation
+- Authentication and authorization
+- Pagination and filtering
+- API timeouts where relevant
+- Request correlation IDs for troubleshooting
+- Safe and useful server logs
+- Health and readiness checks
+
+Do not return success when a database write fails.
+
+Do not swallow errors silently.
+
+Do not expose internal stack traces in production.
+
+Keep frontend API calls in the existing API utility or service layer rather than scattering raw fetch calls throughout components.
+
+Ensure that the actual frontend origin is allowed by CORS configuration. Do not assume Vite always uses port 5173; configure the approved origins correctly for development and production.
+
+---
+
+# 17. TESTING AND RELIABILITY
+
+Add tests using the testing tools already available in the project. If no test framework exists, select a lightweight, compatible option only when necessary.
+
+Cover at least:
+
+### Authentication
+- Valid login
+- Invalid credentials
+- Inactive account
+- Password reset
+- Expired or invalid tokens
+- Unauthorized role access
+
+### Complaints
+- Successful submission
+- Invalid input
+- Duplicate submission
+- Unauthorized access to another user's complaint
+- Valid and invalid status transitions
+- Staff assignment
+- Reassignment
+- Resolution and reopening
+- SLA escalation
+
+### Notifications
+- Correct recipients
+- Read/unread state
+- Idempotency
+- Provider failure
+- Retry behavior
+
+### AI
+- Valid structured output
+- Invalid AI output
+- Timeout and API failure
+- Rule-based fallback
+- Duplicate detection edge cases
+
+### UI
+- Loading states
+- Empty states
+- API errors
+- Form validation
+- Mobile responsiveness
+
+Use test databases and mocked external services where appropriate. Never run destructive tests against real production data.
+
+Test the frontend production build, backend startup, API health endpoint, and the critical user journey.
+
+Do not claim tests passed unless they were actually executed.
+
+---
+
+# 18. ENVIRONMENT CONFIGURATION AND DEPLOYMENT
+
+Inspect the existing `.env.example` files and update them without including real secrets.
+
+Document configuration for:
+- MongoDB Atlas URI
+- JWT secret
+- Port
+- Approved frontend origin(s)
+- AI provider key
+- SMTP settings
+- Optional SMS provider
+- File-storage settings
+- Environment mode
+
+Use clear placeholders, not actual passwords.
+
+Provide:
+- Frontend setup commands
+- Backend setup commands
+- Database setup instructions
+- Admin seed instructions
+- Local development instructions
+- Production build instructions
+- Deployment guidance
+- Troubleshooting steps
+
+Ensure frontend environment variables use the existing API URL convention, such as `VITE_API_URL`.
+
+Keep development and production configurations separate.
+
+Do not require optional email, SMS, or AI providers for basic login and complaint management to work.
+
+If the AI provider is unavailable, core complaint management must remain usable.
+
+---
+
+# 19. DEFINITION OF DONE
+
+The project is not complete merely because the UI looks attractive.
+
+Consider the work complete only when:
+
+1. The frontend builds successfully.
+2. The backend starts without application errors.
+3. MongoDB Atlas connection is verified.
+4. The common login page works for authorized account types.
+5. Public registration is disabled.
+6. Role-based access is enforced by the backend.
+7. Complaints are saved and retrieved from MongoDB.
+8. Users can view only complaints they are authorized to access.
+9. Admins can manage users, staff, departments, and complaints.
+10. AI classification has a validated fallback.
+11. Assignment, status history, and SLA rules behave consistently.
+12. Notifications are persisted and duplicate events are controlled.
+13. Dashboard analytics use real database data.
+14. Important error, loading, and empty states work.
+15. Security checks and critical automated tests pass.
+16. No fake data is presented as live production data.
+17. No secrets are exposed in frontend code or Git.
+18. The application is usable on mobile and desktop.
+19. Setup and deployment instructions are documented.
+20. Existing working features have not been unnecessarily removed.
+
+If any item cannot be completed because credentials, external services, or infrastructure are unavailable, implement the safe parts, document the blocker, and explain how to verify the remaining item.
+
+---
+
+# 20. EXECUTION INSTRUCTIONS
+
+Work in this order:
+
+Phase 1: Inspect the repository and report the key problems.
+
+Phase 2: Fix blocking errors, project configuration, API integration, CORS, and database connectivity.
+
+Phase 3: Repair authentication, permissions, user management, and complaint workflows.
+
+Phase 4: Improve AI classification, duplicate detection, assignment, SLA handling, and notifications.
+
+Phase 5: Improve frontend design, responsiveness, performance, accessibility, and error states.
+
+Phase 6: Add or repair tests, verify production builds, and document deployment.
+
+After each phase:
+- List the files changed.
+- Explain what was fixed.
+- Run the relevant checks.
+- Report any remaining problems honestly.
+
+Do not replace real backend functionality with localStorage, hardcoded arrays, mock APIs, or fake success messages.
+
+Do not rewrite the entire application unless a specific architectural issue makes it necessary. If a major rewrite is genuinely needed, explain why and preserve existing data and features.
+
+**Final objective:** Deliver a fast, secure, reliable, AI-assisted Campus Care platform that students, faculty, staff, and administrators can use to report, assign, track, resolve, and analyze campus complaints through one consistent system.

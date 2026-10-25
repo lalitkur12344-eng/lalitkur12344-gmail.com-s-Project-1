@@ -1,0 +1,8 @@
+{
+  "name": "REC Bijnor Campus Care - AI Complaint & Service System",
+  "description": "Comprehensive AI-powered campus complaint, service, and facility management system for Rajkiya Engineering College, Bijnor.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

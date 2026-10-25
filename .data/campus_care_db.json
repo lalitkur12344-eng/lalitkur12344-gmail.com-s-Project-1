@@ -1,0 +1,974 @@
+{
+  "departments": [
+    {
+      "id": "dept_elec",
+      "name": "Electricity",
+      "code": "ELEC",
+      "headOfDepartment": "Er. S. P. Gupta (Executive Engineer Electrical)",
+      "contactEmail": "electrical@recb.ac.in",
+      "slaHoursDefault": {
+        "Low": 36,
+        "Medium": 16,
+        "High": 8,
+        "Emergency": 4
+      },
+      "categories": [
+        "Electricity"
+      ],
+      "createdAt": "2026-10-22T13:45:11.065Z",
+      "updatedAt": "2026-10-22T13:45:11.065Z"
+    },
+    {
+      "id": "dept_wtr",
+      "name": "Water",
+      "code": "WTR",
+      "headOfDepartment": "Er. Anil Rawat (Junior Engineer Civil)",
+      "contactEmail": "water.works@recb.ac.in",
+      "slaHoursDefault": {
+        "Low": 36,
+        "Medium": 18,
+        "High": 8,
+        "Emergency": 4
+      },
+      "categories": [
+        "Water"
+      ],
+      "createdAt": "2026-10-22T13:45:11.066Z",
+      "updatedAt": "2026-10-22T13:45:11.066Z"
+    },
+    {
+      "id": "dept_hst",
+      "name": "Hostel",
+      "code": "HST",
+      "headOfDepartment": "Prof. M. K. Pandey (Chief Hostel Warden)",
+      "contactEmail": "chiefwarden@recb.ac.in",
+      "slaHoursDefault": {
+        "Low": 48,
+        "Medium": 24,
+        "High": 12,
+        "Emergency": 4
+      },
+      "categories": [
+        "Hostel",
+        "Mess & Food"
+      ],
+      "createdAt": "2026-10-22T13:45:11.066Z",
+      "updatedAt": "2026-10-22T13:45:11.066Z"
+    },
+    {
+      "id": "dept_san",
+      "name": "Sanitation",
+      "code": "SAN",
+      "headOfDepartment": "Dr. Sunita Dixit (Sanitation In-charge)",
+      "contactEmail": "sanitation@recb.ac.in",
+      "slaHoursDefault": {
+        "Low": 24,
+        "Medium": 12,
+        "High": 6,
+        "Emergency": 2
+      },
+      "categories": [
+        "Cleanliness",
+        "Sanitation"
+      ],
+      "createdAt": "2026-10-22T13:45:11.066Z",
+      "updatedAt": "2026-10-22T13:45:11.066Z"
+    },
+    {
+      "id": "dept_net",
+      "name": "Internet & Network",
+      "code": "NET",
+      "headOfDepartment": "Dr. Amit Verma (Head Computer Center)",
+      "contactEmail": "computercenter@recb.ac.in",
+      "slaHoursDefault": {
+        "Low": 36,
+        "Medium": 18,
+        "High": 8,
+        "Emergency": 4
+      },
+      "categories": [
+        "Internet & Network"
+      ],
+      "createdAt": "2026-10-22T13:45:11.066Z",
+      "updatedAt": "2026-10-22T13:45:11.066Z"
+    },
+    {
+      "id": "dept_maint",
+      "name": "Maintenance",
+      "code": "MAINT",
+      "headOfDepartment": "Er. D. K. Sharma (Estate Officer)",
+      "contactEmail": "estate@recb.ac.in",
+      "slaHoursDefault": {
+        "Low": 48,
+        "Medium": 24,
+        "High": 12,
+        "Emergency": 6
+      },
+      "categories": [
+        "Maintenance",
+        "Other"
+      ],
+      "createdAt": "2026-10-22T13:45:11.067Z",
+      "updatedAt": "2026-10-22T13:45:11.067Z"
+    },
+    {
+      "id": "dept_lib",
+      "name": "Academic & Library",
+      "code": "LIB",
+      "headOfDepartment": "Dr. R. K. Singh (Librarian)",
+      "contactEmail": "library@recb.ac.in",
+      "slaHoursDefault": {
+        "Low": 48,
+        "Medium": 24,
+        "High": 12,
+        "Emergency": 6
+      },
+      "categories": [
+        "Library"
+      ],
+      "createdAt": "2026-10-22T13:45:11.067Z",
+      "updatedAt": "2026-10-22T13:45:11.067Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_admin_01",
+      "identifier": "admin",
+      "email": "admin@recb.ac.in",
+      "name": "Prof. Rajesh Sharma (Dean Student Welfare)",
+      "role": "admin",
+      "passwordHash": "$2b$10$9TWaAXVhfFdqTzntoatDCe2aSFdw0G0frKcOvA5wi6t6ZsZvnizN.",
+      "department": "Deanery / Administration",
+      "mobileNumber": "+91 94120 12345",
+      "isActive": true,
+      "createdAt": "2026-10-22T13:45:11.067Z",
+      "updatedAt": "2026-10-22T13:45:32.213Z",
+      "lastLogin": "2026-10-22T13:45:32.212Z"
+    },
+    {
+      "id": "usr_faculty_01",
+      "identifier": "fac_cs_01",
+      "email": "faculty.cs@recb.ac.in",
+      "name": "Dr. Amit Verma (Head of Computer Science)",
+      "role": "faculty",
+      "passwordHash": "$2b$10$9TWaAXVhfFdqTzntoatDCe2aSFdw0G0frKcOvA5wi6t6ZsZvnizN.",
+      "department": "Internet & Network",
+      "mobileNumber": "+91 94120 54321",
+      "isActive": true,
+      "createdAt": "2026-10-22T13:45:11.067Z",
+      "updatedAt": "2026-10-22T13:45:11.067Z"
+    },
+    {
+      "id": "usr_staff_elec",
+      "identifier": "stf_elec_01",
+      "email": "staff.electrical@recb.ac.in",
+      "name": "Ramesh Kumar (Junior Engineer Electrical)",
+      "role": "staff",
+      "passwordHash": "$2b$10$9TWaAXVhfFdqTzntoatDCe2aSFdw0G0frKcOvA5wi6t6ZsZvnizN.",
+      "department": "Electricity",
+      "mobileNumber": "+91 98370 11223",
+      "isActive": true,
+      "createdAt": "2026-10-22T13:45:11.068Z",
+      "updatedAt": "2026-10-22T13:46:44.715Z",
+      "lastLogin": "2026-10-22T13:46:44.715Z"
+    },
+    {
+      "id": "usr_staff_hst",
+      "identifier": "stf_hst_01",
+      "email": "staff.hostel@recb.ac.in",
+      "name": "Surendra Singh (Hostel Warden & Maintenance Supv.)",
+      "role": "staff",
+      "passwordHash": "$2b$10$9TWaAXVhfFdqTzntoatDCe2aSFdw0G0frKcOvA5wi6t6ZsZvnizN.",
+      "department": "Hostel",
+      "mobileNumber": "+91 98370 44556",
+      "isActive": true,
+      "createdAt": "2026-10-22T13:45:11.068Z",
+      "updatedAt": "2026-10-22T13:45:11.068Z"
+    },
+    {
+      "id": "usr_staff_net",
+      "identifier": "stf_net_01",
+      "email": "staff.network@recb.ac.in",
+      "name": "Vikas Gupta (System Admin & Network Engr.)",
+      "role": "staff",
+      "passwordHash": "$2b$10$9TWaAXVhfFdqTzntoatDCe2aSFdw0G0frKcOvA5wi6t6ZsZvnizN.",
+      "department": "Internet & Network",
+      "mobileNumber": "+91 98370 77889",
+      "isActive": true,
+      "createdAt": "2026-10-22T13:45:11.068Z",
+      "updatedAt": "2026-10-22T13:45:11.068Z"
+    },
+    {
+      "id": "usr_stud_01",
+      "identifier": "2201330100045",
+      "email": "student.rahul@recb.ac.in",
+      "name": "Rahul Kumar Yadav",
+      "role": "student",
+      "passwordHash": "$2b$10$9TWaAXVhfFdqTzntoatDCe2aSFdw0G0frKcOvA5wi6t6ZsZvnizN.",
+      "department": "Computer Science & Engineering",
+      "enrollmentNumber": "2201330100045",
+      "mobileNumber": "+91 95570 99881",
+      "academicYear": "Final Year (B.Tech 4th Year)",
+      "hostel": "Ramanujan Hostel (Boys Hostel 1)",
+      "roomNumber": "304",
+      "isActive": true,
+      "createdAt": "2026-10-22T13:45:11.068Z",
+      "updatedAt": "2026-10-23T07:38:22.873Z",
+      "lastLogin": "2026-10-23T07:38:22.872Z"
+    },
+    {
+      "id": "usr_stud_02",
+      "identifier": "2301330100088",
+      "email": "student.priya@recb.ac.in",
+      "name": "Priya Sharma",
+      "role": "student",
+      "passwordHash": "$2b$10$9TWaAXVhfFdqTzntoatDCe2aSFdw0G0frKcOvA5wi6t6ZsZvnizN.",
+      "department": "Information Technology",
+      "enrollmentNumber": "2301330100088",
+      "mobileNumber": "+91 95570 33442",
+      "academicYear": "3rd Year (B.Tech)",
+      "hostel": "Kalpana Chawla Hostel (Girls Hostel)",
+      "roomNumber": "212",
+      "isActive": true,
+      "createdAt": "2026-10-22T13:45:11.069Z",
+      "updatedAt": "2026-10-22T13:45:11.069Z"
+    }
+  ],
+  "complaints": [
+    {
+      "id": "rec_cmp_1001",
+      "complaintId": "REC-2026-1001",
+      "title": "Hostel 1 3rd Floor Water Cooler Not Cooling",
+      "description": "The stainless steel drinking water cooler outside room 305 on the 3rd floor is dispensing room-temperature water. The compressor is making a clicking sound but not starting.",
+      "category": "Water",
+      "location": {
+        "area": "Hostels",
+        "block": "Ramanujan Hostel (Boys Hostel 1)",
+        "room": "3rd Floor Corridor",
+        "landmark": "Opposite Room 305"
+      },
+      "priority": "High",
+      "severity": 4,
+      "status": "In Progress",
+      "isEscalated": true,
+      "createdBy": {
+        "id": "usr_stud_01",
+        "name": "Rahul Kumar Yadav",
+        "email": "student.rahul@recb.ac.in",
+        "role": "student",
+        "mobileNumber": "+91 95570 99881"
+      },
+      "assignedTo": {
+        "id": "usr_staff_elec",
+        "name": "Ramesh Kumar (Junior Engineer Electrical)",
+        "email": "staff.electrical@recb.ac.in",
+        "department": "Electricity"
+      },
+      "assignedDepartment": "Electricity",
+      "evidenceImages": [],
+      "resolutionNotes": "Inspected thermostat and relay. Replacement capacitor ordered from store.",
+      "resolutionEvidence": [],
+      "slaHours": 8,
+      "slaDeadline": "2026-10-22T19:45:11.069Z",
+      "aiSummary": "Water cooler compressor issue dispensing uncooled water on 3rd floor corridor.",
+      "aiSuggestedChecklist": [
+        "Check line voltage supply to water cooler",
+        "Inspect start capacitor and thermal overload protector",
+        "Verify refrigerant gas pressure",
+        "Clean condenser fins of dust accumulation"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-10-22T09:45:11.069Z",
+          "action": "SUBMITTED",
+          "actor": {
+            "id": "usr_stud_01",
+            "name": "Rahul Kumar Yadav",
+            "role": "student"
+          },
+          "notes": "Complaint registered by student."
+        },
+        {
+          "timestamp": "2026-10-22T09:57:11.069Z",
+          "action": "AUTO_ASSIGNED",
+          "actor": {
+            "id": "SYSTEM",
+            "name": "Campus Care Dispatcher",
+            "role": "system"
+          },
+          "notes": "Auto-assigned to Ramesh Kumar (Electricity) based on workload and category."
+        },
+        {
+          "timestamp": "2026-10-22T11:45:11.069Z",
+          "action": "IN_PROGRESS",
+          "actor": {
+            "id": "usr_staff_elec",
+            "name": "Ramesh Kumar",
+            "role": "staff"
+          },
+          "notes": "Technician on site, diagnosing compressor capacitor."
+        },
+        {
+          "timestamp": "2026-10-23T07:34:20.501Z",
+          "action": "ESCALATED",
+          "actor": {
+            "id": "SYSTEM_SLA_WATCHDOG",
+            "name": "Campus Care SLA Engine",
+            "role": "system"
+          },
+          "notes": "SLA breached: Target deadline of 8h passed without resolution. Auto-escalated to Department HOD and Dean Student Welfare."
+        }
+      ],
+      "feedback": null,
+      "createdAt": "2026-10-22T09:45:11.069Z",
+      "updatedAt": "2026-10-23T07:34:20.502Z",
+      "escalatedAt": "2026-10-23T07:34:20.501Z",
+      "escalationReason": "SLA breached: Target deadline of 8h passed without resolution. Auto-escalated to Department HOD and Dean Student Welfare."
+    },
+    {
+      "id": "rec_cmp_1002",
+      "complaintId": "REC-2026-1002",
+      "title": "WiFi Access Point Down in CS Block 2nd Floor",
+      "description": "The Cisco access point mounted near Lab 4 in Computer Science Block is offline. The indicator LED is solid amber and SSID REC-CAMPUS-WIFI is not broadcasting.",
+      "category": "Internet & Network",
+      "location": {
+        "area": "Academic Blocks",
+        "block": "Computer Science & Engineering Block",
+        "room": "Lab 4 Corridor",
+        "landmark": "Near Server Room Rack B"
+      },
+      "priority": "High",
+      "severity": 4,
+      "status": "Resolved",
+      "isEscalated": false,
+      "createdBy": {
+        "id": "usr_faculty_01",
+        "name": "Dr. Amit Verma (Head of Computer Science)",
+        "email": "faculty.cs@recb.ac.in",
+        "role": "faculty",
+        "mobileNumber": "+91 94120 54321"
+      },
+      "assignedTo": {
+        "id": "usr_staff_net",
+        "name": "Vikas Gupta (System Admin & Network Engr.)",
+        "email": "staff.network@recb.ac.in",
+        "department": "Internet & Network"
+      },
+      "assignedDepartment": "Internet & Network",
+      "evidenceImages": [],
+      "resolutionNotes": "PoE patch cable replaced at switch port #18. Access point rebooted and re-associated with central controller. 200 Mbps throughput verified.",
+      "resolutionEvidence": [],
+      "slaHours": 8,
+      "slaDeadline": "2026-10-22T03:45:11.069Z",
+      "aiSummary": "CS Block Lab 4 Wi-Fi access point offline due to PoE connectivity fault.",
+      "aiSuggestedChecklist": [
+        "Check Cisco switch port link status",
+        "Test PoE voltage on RJ-45 cable",
+        "Verify VLAN tagging for Student/Faculty subnet"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-10-21T13:45:11.069Z",
+          "action": "SUBMITTED",
+          "actor": {
+            "id": "usr_faculty_01",
+            "name": "Dr. Amit Verma",
+            "role": "faculty"
+          },
+          "notes": "Reported by HOD Computer Science."
+        },
+        {
+          "timestamp": "2026-10-21T17:45:11.069Z",
+          "action": "RESOLVED",
+          "actor": {
+            "id": "usr_staff_net",
+            "name": "Vikas Gupta",
+            "role": "staff"
+          },
+          "notes": "Patch cable replaced, AP confirmed online."
+        }
+      ],
+      "feedback": {
+        "rating": 5,
+        "comments": "Prompt resolution within 4 hours. Wi-Fi speeds are now excellent for the lab students.",
+        "submittedAt": "2026-10-21T19:45:11.069Z"
+      },
+      "createdAt": "2026-10-21T13:45:11.069Z",
+      "updatedAt": "2026-10-22T13:45:11.070Z",
+      "resolvedAt": "2026-10-21T17:45:11.069Z"
+    },
+    {
+      "id": "rec_cmp_1003",
+      "complaintId": "REC-2026-1003",
+      "title": "Sparking Switchboard in Electrical Machines Lab",
+      "description": "During 2nd year practical session, main 3-phase switchboard #3 emitted a loud spark and smoke smell. Circuit was manually tripped by lab assistant.",
+      "category": "Electricity",
+      "location": {
+        "area": "Workshops & Labs",
+        "block": "Electrical Engineering Block",
+        "room": "Lab 2 (Machines Lab)",
+        "landmark": "Main Control Panel 3"
+      },
+      "priority": "Emergency",
+      "severity": 5,
+      "status": "Assigned",
+      "isEscalated": true,
+      "createdBy": {
+        "id": "usr_stud_02",
+        "name": "Priya Sharma",
+        "email": "student.priya@recb.ac.in",
+        "role": "student",
+        "mobileNumber": "+91 95570 33442"
+      },
+      "assignedTo": {
+        "id": "usr_staff_elec",
+        "name": "Ramesh Kumar (Junior Engineer Electrical)",
+        "email": "staff.electrical@recb.ac.in",
+        "department": "Electricity"
+      },
+      "assignedDepartment": "Electricity",
+      "evidenceImages": [],
+      "slaHours": 4,
+      "slaDeadline": "2026-10-22T15:45:11.069Z",
+      "aiSummary": "CRITICAL: Electrical fire hazard from sparking 3-phase switchboard in Machines Lab.",
+      "aiSuggestedChecklist": [
+        "Confirm upstream lockout/tagout (LOTO) is in effect",
+        "Inspect terminal lugs for thermal discoloration and loose screw torque",
+        "Replace charred terminal blocks and contactor",
+        "Perform 500V Megger insulation resistance test before re-energizing"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-10-22T12:15:11.069Z",
+          "action": "SUBMITTED",
+          "actor": {
+            "id": "usr_stud_02",
+            "name": "Priya Sharma",
+            "role": "student"
+          },
+          "notes": "Emergency complaint submitted."
+        },
+        {
+          "timestamp": "2026-10-22T12:21:11.069Z",
+          "action": "ASSIGNED",
+          "actor": {
+            "id": "SYSTEM",
+            "name": "Emergency Dispatch Rule",
+            "role": "system"
+          },
+          "notes": "Auto-dispatched immediately to Senior Electrician on duty."
+        },
+        {
+          "timestamp": "2026-10-23T07:34:20.501Z",
+          "action": "ESCALATED",
+          "actor": {
+            "id": "SYSTEM_SLA_WATCHDOG",
+            "name": "Campus Care SLA Engine",
+            "role": "system"
+          },
+          "notes": "SLA breached: Target deadline of 4h passed without resolution. Auto-escalated to Department HOD and Dean Student Welfare."
+        }
+      ],
+      "feedback": null,
+      "createdAt": "2026-10-22T12:15:11.069Z",
+      "updatedAt": "2026-10-23T07:34:20.505Z",
+      "escalatedAt": "2026-10-23T07:34:20.501Z",
+      "escalationReason": "SLA breached: Target deadline of 4h passed without resolution. Auto-escalated to Department HOD and Dean Student Welfare."
+    },
+    {
+      "id": "rec_cmp_1004",
+      "complaintId": "REC-2026-1004",
+      "title": "Washroom Door Latch Damaged in Kalpana Chawla Hostel",
+      "description": "The internal aluminum bolt latch on room 212 washroom is broken and stuck. Needs replacement for safety.",
+      "category": "Hostel",
+      "location": {
+        "area": "Hostels",
+        "block": "Kalpana Chawla Hostel (Girls Hostel)",
+        "room": "Room 212",
+        "landmark": "2nd Floor West Wing"
+      },
+      "priority": "Medium",
+      "severity": 3,
+      "status": "Assigned",
+      "isEscalated": false,
+      "createdBy": {
+        "id": "usr_stud_02",
+        "name": "Priya Sharma",
+        "email": "student.priya@recb.ac.in",
+        "role": "student",
+        "mobileNumber": "+91 95570 33442"
+      },
+      "assignedTo": {
+        "id": "usr_staff_hst",
+        "name": "Surendra Singh (Hostel Warden & Maintenance Supv.)",
+        "email": "staff.hostel@recb.ac.in",
+        "department": "Hostel"
+      },
+      "assignedDepartment": "Hostel",
+      "evidenceImages": [],
+      "slaHours": 24,
+      "slaDeadline": "2026-10-23T07:45:11.069Z",
+      "aiSummary": "Internal door latch repair required in girls hostel room 212.",
+      "aiSuggestedChecklist": [
+        "Visit hostel along with female warden / security guard",
+        "Replace latch mechanism with heavy-duty brass bolt",
+        "Check door frame alignment"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-10-22T08:45:11.069Z",
+          "action": "SUBMITTED",
+          "actor": {
+            "id": "usr_stud_02",
+            "name": "Priya Sharma",
+            "role": "student"
+          },
+          "notes": "Registered by resident student."
+        }
+      ],
+      "feedback": null,
+      "createdAt": "2026-10-22T08:45:11.069Z",
+      "updatedAt": "2026-10-22T13:45:11.071Z"
+    },
+    {
+      "complaintId": "REC-2026-1005",
+      "title": "Ceiling fan sparking violently in room 304",
+      "description": "The ceiling regulator and fan wiring short circuited and started sparking with burnt plastic smell.",
+      "category": "Electricity",
+      "location": {
+        "area": "Hostels",
+        "block": "Ramanujan Hostel (Boys Hostel 1)",
+        "room": "Room 304",
+        "landmark": ""
+      },
+      "priority": "Emergency",
+      "severity": 5,
+      "status": "Assigned",
+      "isEscalated": true,
+      "createdBy": {
+        "id": "usr_stud_01",
+        "name": "Rahul Kumar Yadav",
+        "email": "student.rahul@recb.ac.in",
+        "role": "student",
+        "mobileNumber": ""
+      },
+      "assignedTo": {
+        "id": "usr_staff_elec",
+        "name": "Ramesh Kumar (Junior Engineer Electrical)",
+        "email": "staff.electrical@recb.ac.in",
+        "department": "Electricity"
+      },
+      "assignedDepartment": "Electricity",
+      "evidenceImages": [],
+      "resolutionNotes": "",
+      "resolutionEvidence": [],
+      "slaHours": 4,
+      "slaDeadline": "2026-10-22T17:46:39.127Z",
+      "aiSummary": "The ceiling regulator and fan wiring short circuited and started sparking with b...",
+      "aiSuggestedChecklist": [
+        "Isolate electric circuit breaker before inspection",
+        "Inspect wiring, switchboard socket, or fixture",
+        "Replace damaged fuse/MCB or components",
+        "Conduct voltage and safety continuity test"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-10-22T13:46:39.127Z",
+          "action": "SUBMITTED",
+          "actor": {
+            "id": "usr_stud_01",
+            "name": "Rahul Kumar Yadav",
+            "role": "student"
+          },
+          "notes": "Complaint filed via portal. Categorized under Electricity (Electricity)."
+        },
+        {
+          "timestamp": "2026-10-22T13:46:39.227Z",
+          "action": "AUTO_ASSIGNED",
+          "actor": {
+            "id": "SYSTEM_DISPATCHER",
+            "name": "Workload Balancing Engine",
+            "role": "system"
+          },
+          "notes": "Automatically assigned to Ramesh Kumar (Junior Engineer Electrical) based on department duty roster and active workload."
+        },
+        {
+          "timestamp": "2026-10-23T07:34:20.501Z",
+          "action": "ESCALATED",
+          "actor": {
+            "id": "SYSTEM_SLA_WATCHDOG",
+            "name": "Campus Care SLA Engine",
+            "role": "system"
+          },
+          "notes": "SLA breached: Target deadline of 4h passed without resolution. Auto-escalated to Department HOD and Dean Student Welfare."
+        }
+      ],
+      "feedback": null,
+      "createdAt": "2026-10-22T13:46:39.127Z",
+      "updatedAt": "2026-10-23T07:34:20.507Z",
+      "id": "rec_nirbvgmcg",
+      "escalatedAt": "2026-10-23T07:34:20.501Z",
+      "escalationReason": "SLA breached: Target deadline of 4h passed without resolution. Auto-escalated to Department HOD and Dean Student Welfare."
+    }
+  ],
+  "announcements": [
+    {
+      "id": "ann_01",
+      "title": "Scheduled Electrical Substation Maintenance - Sunday",
+      "content": "Please be informed that 33kV main campus substation maintenance is scheduled for Sunday from 09:00 AM to 01:00 PM. Backup DG sets will power Academic Blocks and Essential Hostel loads.",
+      "priority": "Urgent",
+      "targetAudience": "all",
+      "createdBy": {
+        "id": "usr_admin_01",
+        "name": "Prof. Rajesh Sharma (Dean Student Welfare)"
+      },
+      "createdAt": "2026-10-20T13:45:11.069Z",
+      "updatedAt": "2026-10-22T13:45:11.072Z"
+    },
+    {
+      "id": "ann_02",
+      "title": "Periodic Overhead Drinking Water Tank Disinfection",
+      "content": "The Estate Office is carrying out mandatory UV and chlorine sanitization of overhead water tanks across all boys and girls hostels on Wednesday. Water supply will be maintained via ground reservoirs.",
+      "priority": "Normal",
+      "targetAudience": "student",
+      "createdBy": {
+        "id": "usr_admin_01",
+        "name": "Er. D. K. Sharma (Estate Officer)"
+      },
+      "createdAt": "2026-10-21T13:45:11.069Z",
+      "updatedAt": "2026-10-22T13:45:11.072Z"
+    },
+    {
+      "id": "ann_03",
+      "title": "Campus High-Speed Wi-Fi Upgraded in Central Library",
+      "content": "New Wi-Fi 6 Access Points have been installed in the Central Library Reading Hall and Digital Learning Center. Students may connect with their institutional credentials.",
+      "priority": "Normal",
+      "targetAudience": "all",
+      "createdBy": {
+        "id": "usr_admin_01",
+        "name": "Dr. Amit Verma (Head Computer Center)"
+      },
+      "createdAt": "2026-10-22T01:45:11.069Z",
+      "updatedAt": "2026-10-22T13:45:11.073Z"
+    }
+  ],
+  "notifications": [
+    {
+      "recipientId": "usr_stud_01",
+      "eventType": "assigned",
+      "title": "Complaint In Progress: #REC-2026-1001",
+      "message": "Your complaint regarding Hostel 1 Water Cooler has been assigned to Ramesh Kumar (Electricity) and technician is on-site.",
+      "complaintId": "REC-2026-1001",
+      "isRead": false,
+      "id": "rec_09a9s18qd",
+      "createdAt": "2026-10-22T13:45:11.074Z",
+      "updatedAt": "2026-10-22T13:45:11.074Z"
+    },
+    {
+      "recipientId": "usr_staff_elec",
+      "eventType": "assigned",
+      "title": "New Emergency Assigned: #REC-2026-1003",
+      "message": "High priority complaint assigned: Sparking Switchboard in Electrical Machines Lab. SLA: 4 hours.",
+      "complaintId": "REC-2026-1003",
+      "isRead": false,
+      "id": "rec_2yyianixw",
+      "createdAt": "2026-10-22T13:45:11.074Z",
+      "updatedAt": "2026-10-22T13:45:11.074Z"
+    },
+    {
+      "recipientId": "usr_stud_01",
+      "eventType": "submitted",
+      "title": "Complaint Registered: #REC-2026-1005",
+      "message": "Your complaint \"Ceiling fan sparking violently in room 304\" has been registered and assigned to Electricity. SLA deadline: 4 hours.",
+      "complaintId": "REC-2026-1005",
+      "isRead": false,
+      "id": "rec_ch7y3stew",
+      "createdAt": "2026-10-22T13:46:39.130Z",
+      "updatedAt": "2026-10-22T13:46:39.130Z"
+    },
+    {
+      "recipientId": "usr_staff_elec",
+      "eventType": "assigned",
+      "title": "New Task Assigned: #REC-2026-1005",
+      "message": "A new Emergency priority complaint \"Ceiling fan sparking violently in room 304\" in Hostels has been assigned to you.",
+      "complaintId": "REC-2026-1005",
+      "isRead": false,
+      "id": "rec_hd4zopmph",
+      "createdAt": "2026-10-22T13:46:39.130Z",
+      "updatedAt": "2026-10-22T13:46:39.130Z"
+    },
+    {
+      "recipientId": "role:admin",
+      "eventType": "escalated",
+      "title": "⚠️ Overdue Complaint Escalation: #REC-2026-1001",
+      "message": "Complaint \"Hostel 1 3rd Floor Water Cooler Not Cooling\" in Electricity breached its 8h SLA. Immediate intervention required.",
+      "complaintId": "REC-2026-1001",
+      "isRead": false,
+      "id": "rec_lyiu3i8t4",
+      "createdAt": "2026-10-23T07:34:20.503Z",
+      "updatedAt": "2026-10-23T07:34:20.503Z"
+    },
+    {
+      "recipientId": "usr_staff_elec",
+      "eventType": "escalated",
+      "title": "🚨 Urgent: Complaint #REC-2026-1001 Escalated",
+      "message": "Assigned task \"Hostel 1 3rd Floor Water Cooler Not Cooling\" has breached SLA deadline. Please provide a status update immediately.",
+      "complaintId": "REC-2026-1001",
+      "isRead": false,
+      "id": "rec_bmjo1p3pe",
+      "createdAt": "2026-10-23T07:34:20.504Z",
+      "updatedAt": "2026-10-23T07:34:20.504Z"
+    },
+    {
+      "recipientId": "role:admin",
+      "eventType": "escalated",
+      "title": "⚠️ Overdue Complaint Escalation: #REC-2026-1003",
+      "message": "Complaint \"Sparking Switchboard in Electrical Machines Lab\" in Electricity breached its 4h SLA. Immediate intervention required.",
+      "complaintId": "REC-2026-1003",
+      "isRead": false,
+      "id": "rec_2s4hxf5wg",
+      "createdAt": "2026-10-23T07:34:20.506Z",
+      "updatedAt": "2026-10-23T07:34:20.506Z"
+    },
+    {
+      "recipientId": "usr_staff_elec",
+      "eventType": "escalated",
+      "title": "🚨 Urgent: Complaint #REC-2026-1003 Escalated",
+      "message": "Assigned task \"Sparking Switchboard in Electrical Machines Lab\" has breached SLA deadline. Please provide a status update immediately.",
+      "complaintId": "REC-2026-1003",
+      "isRead": false,
+      "id": "rec_q4tpfb253",
+      "createdAt": "2026-10-23T07:34:20.506Z",
+      "updatedAt": "2026-10-23T07:34:20.506Z"
+    },
+    {
+      "recipientId": "role:admin",
+      "eventType": "escalated",
+      "title": "⚠️ Overdue Complaint Escalation: #REC-2026-1005",
+      "message": "Complaint \"Ceiling fan sparking violently in room 304\" in Electricity breached its 4h SLA. Immediate intervention required.",
+      "complaintId": "REC-2026-1005",
+      "isRead": false,
+      "id": "rec_mj6iqftc4",
+      "createdAt": "2026-10-23T07:34:20.508Z",
+      "updatedAt": "2026-10-23T07:34:20.508Z"
+    },
+    {
+      "recipientId": "usr_staff_elec",
+      "eventType": "escalated",
+      "title": "🚨 Urgent: Complaint #REC-2026-1005 Escalated",
+      "message": "Assigned task \"Ceiling fan sparking violently in room 304\" has breached SLA deadline. Please provide a status update immediately.",
+      "complaintId": "REC-2026-1005",
+      "isRead": false,
+      "id": "rec_q4exr88mb",
+      "createdAt": "2026-10-23T07:34:20.509Z",
+      "updatedAt": "2026-10-23T07:34:20.509Z"
+    }
+  ],
+  "auditLogs": [
+    {
+      "action": "SYSTEM_BOOTSTRAP",
+      "actor": {
+        "id": "SYSTEM",
+        "name": "Campus Care Core Engine",
+        "role": "system"
+      },
+      "details": {
+        "event": "REC Bijnor initial database seed completed successfully"
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-22T13:45:11.069Z",
+      "id": "rec_zsce6xolb",
+      "createdAt": "2026-10-22T13:45:11.075Z",
+      "updatedAt": "2026-10-22T13:45:11.075Z"
+    },
+    {
+      "action": "USER_LOGIN",
+      "actor": {
+        "id": "usr_admin_01",
+        "name": "Prof. Rajesh Sharma (Dean Student Welfare)",
+        "role": "admin"
+      },
+      "details": {
+        "email": "admin@recb.ac.in",
+        "role": "admin"
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-22T13:45:17.603Z",
+      "id": "rec_cv4954chi",
+      "createdAt": "2026-10-22T13:45:17.604Z",
+      "updatedAt": "2026-10-22T13:45:17.604Z"
+    },
+    {
+      "action": "USER_LOGIN",
+      "actor": {
+        "id": "usr_stud_01",
+        "name": "Rahul Kumar Yadav",
+        "role": "student"
+      },
+      "details": {
+        "email": "student.rahul@recb.ac.in",
+        "role": "student"
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-22T13:45:22.185Z",
+      "id": "rec_hgmn54mji",
+      "createdAt": "2026-10-22T13:45:22.185Z",
+      "updatedAt": "2026-10-22T13:45:22.185Z"
+    },
+    {
+      "action": "USER_LOGIN",
+      "actor": {
+        "id": "usr_stud_01",
+        "name": "Rahul Kumar Yadav",
+        "role": "student"
+      },
+      "details": {
+        "email": "student.rahul@recb.ac.in",
+        "role": "student"
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-22T13:45:27.327Z",
+      "id": "rec_qhqtfqqs8",
+      "createdAt": "2026-10-22T13:45:27.327Z",
+      "updatedAt": "2026-10-22T13:45:27.327Z"
+    },
+    {
+      "action": "USER_LOGIN",
+      "actor": {
+        "id": "usr_admin_01",
+        "name": "Prof. Rajesh Sharma (Dean Student Welfare)",
+        "role": "admin"
+      },
+      "details": {
+        "email": "admin@recb.ac.in",
+        "role": "admin"
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-22T13:45:32.214Z",
+      "id": "rec_pl9h4mlty",
+      "createdAt": "2026-10-22T13:45:32.214Z",
+      "updatedAt": "2026-10-22T13:45:32.214Z"
+    },
+    {
+      "action": "USER_LOGIN",
+      "actor": {
+        "id": "usr_stud_01",
+        "name": "Rahul Kumar Yadav",
+        "role": "student"
+      },
+      "details": {
+        "email": "student.rahul@recb.ac.in",
+        "role": "student"
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-22T13:45:37.446Z",
+      "id": "rec_n6uv2iwvc",
+      "createdAt": "2026-10-22T13:45:37.447Z",
+      "updatedAt": "2026-10-22T13:45:37.447Z"
+    },
+    {
+      "action": "USER_LOGIN",
+      "actor": {
+        "id": "usr_stud_01",
+        "name": "Rahul Kumar Yadav",
+        "role": "student"
+      },
+      "details": {
+        "email": "student.rahul@recb.ac.in",
+        "role": "student"
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-22T13:46:17.070Z",
+      "id": "rec_i347gwsbc",
+      "createdAt": "2026-10-22T13:46:17.070Z",
+      "updatedAt": "2026-10-22T13:46:17.070Z"
+    },
+    {
+      "action": "USER_LOGIN",
+      "actor": {
+        "id": "usr_stud_01",
+        "name": "Rahul Kumar Yadav",
+        "role": "student"
+      },
+      "details": {
+        "email": "student.rahul@recb.ac.in",
+        "role": "student"
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-22T13:46:37.489Z",
+      "id": "rec_nyxr6otqm",
+      "createdAt": "2026-10-22T13:46:37.490Z",
+      "updatedAt": "2026-10-22T13:46:37.490Z"
+    },
+    {
+      "action": "COMPLAINT_CREATED",
+      "actor": {
+        "id": "usr_stud_01",
+        "name": "Rahul Kumar Yadav",
+        "role": "student"
+      },
+      "details": {
+        "complaintId": "REC-2026-1005",
+        "category": "Electricity",
+        "priority": "Emergency",
+        "department": "Electricity"
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-22T13:46:39.127Z",
+      "id": "rec_yqpf5pypb",
+      "createdAt": "2026-10-22T13:46:39.131Z",
+      "updatedAt": "2026-10-22T13:46:39.131Z"
+    },
+    {
+      "action": "USER_LOGIN",
+      "actor": {
+        "id": "usr_staff_elec",
+        "name": "Ramesh Kumar (Junior Engineer Electrical)",
+        "role": "staff"
+      },
+      "details": {
+        "email": "staff.electrical@recb.ac.in",
+        "role": "staff"
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-22T13:46:44.716Z",
+      "id": "rec_5izp06w25",
+      "createdAt": "2026-10-22T13:46:44.716Z",
+      "updatedAt": "2026-10-22T13:46:44.716Z"
+    },
+    {
+      "action": "USER_LOGIN",
+      "actor": {
+        "id": "usr_stud_01",
+        "name": "Rahul Kumar Yadav",
+        "role": "student"
+      },
+      "details": {
+        "email": "student.rahul@recb.ac.in",
+        "role": "student"
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-23T07:35:51.407Z",
+      "id": "rec_gqss0ka19",
+      "createdAt": "2026-10-23T07:35:51.407Z",
+      "updatedAt": "2026-10-23T07:35:51.407Z"
+    },
+    {
+      "action": "USER_LOGIN",
+      "actor": {
+        "id": "usr_stud_01",
+        "name": "Rahul Kumar Yadav",
+        "role": "student"
+      },
+      "details": {
+        "email": "student.rahul@recb.ac.in",
+        "role": "student"
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-23T07:38:22.874Z",
+      "id": "rec_2p5bsynxw",
+      "createdAt": "2026-10-23T07:38:22.874Z",
+      "updatedAt": "2026-10-23T07:38:22.874Z"
+    }
+  ]
+}
